@@ -1,0 +1,38 @@
+void OnProjectLoad (void) {
+  Project.SetDevice ("AT32F421F8P7");
+  Project.SetHostIF ("USB", "");
+  Project.SetTargetIF ("SWD");
+  Project.SetTIFSpeed ("4 MHz");
+  Edit.SysVar (VAR_HSS_SPEED, FREQ_100_HZ);
+  Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M3.svd");
+  Project.AddSvdFile ("AT32F421xx_v2.svd");
+  File.Open ("build/at32f421_project.elf");
+}
+
+void AfterTargetReset (void) {
+  _SetupTarget();
+}
+
+void AfterTargetDownload (void) {
+  _SetupTarget();
+}
+
+void _SetupTarget(void) {
+  unsigned int SP;
+  unsigned int PC;
+  unsigned int VectorTableAddr;
+
+  VectorTableAddr = Elf.GetBaseAddr();
+
+  SP = Target.ReadU32(VectorTableAddr);
+  if (SP != 0xFFFFFFFF) {
+    Target.SetReg("SP", SP);
+  }
+
+  PC = Elf.GetEntryPointPC();
+  if (PC != 0xFFFFFFFF) {
+    Target.SetReg("PC", PC);
+  } else {
+    Util.Error("Project script error: failed to set up entry point PC", 1);
+  }
+}

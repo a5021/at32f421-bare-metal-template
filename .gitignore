@@ -1,0 +1,19 @@
+# Build output
+build/
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+
+# Files downloaded by setup_project.sh
+inc/
+src/
+
+# IDE and editor specific files
+.vscode/
+*.suo
+*.user
+*.sln
+*.ide/
