@@ -4,6 +4,25 @@ This project demonstrates a minimal, high-performance, and low-power application
 
 The core of the application is an event-driven main loop that uses the ARM core's `WFE` (Wait For Event) instruction to sleep, demonstrating an interrupt-less, low-power architecture suitable for event-based systems.
 
+## Hardware and Toolchain
+
+The hardware for this project is a generic STM32F030F4P6 "blue pill" style development board, commonly found on AliExpress. The original STM32 microcontroller was desoldered and replaced with a pin-compatible **Artery AT32F421F8P7** (TSSOP-20 package).
+
+This modification allows for leveraging the higher performance of the Artery MCU on a cheap and widely available development board.
+
+![Modified AT32F421 Development Board](devboard.jpg)
+
+*   **Microcontroller**: Artery AT32F421F8P7 (ARM Cortex-M4).
+*   **Toolchain**: GNU Arm Embedded Toolchain (`arm-none-eabi-gcc`).
+*   **Debugger**: Any SWD-compatible probe (e.g., J-Link, DAP-Link).
+
+### Pinout
+
+*   `PA4`: TMR14_CH1 - PWM Output.
+*   `PA9`: USART1_TX.
+*   `PA10`: USART1_RX.
+*   `PA13`/`PA14`: SWDIO/SWCLK for debugging.
+
 ## Key Features
 
 *   **Event-Driven, Low-Power Core**: The main loop is driven by timer events and sleeps using `WFE`, consuming minimal power while waiting.
@@ -31,25 +50,6 @@ The software architecture is designed around a single, event-driven `while(1)` l
 
 This model avoids the overhead of ISRs for simple periodic tasks, providing a highly efficient and predictable system.
 
-## Hardware and Toolchain
-
-The hardware for this project is a generic STM32F030F4P6 "blue pill" style development board, commonly found on AliExpress. The original STM32 microcontroller was desoldered and replaced with a pin-compatible **Artery AT32F421F8P7** (TSSOP-20 package).
-
-This modification allows for leveraging the higher performance of the Artery MCU on a cheap and widely available development board.
-
-![Modified AT32F421 Development Board](devboard.jpg)
-
-*   **Microcontroller**: Artery AT32F421F8P7 (ARM Cortex-M4).
-*   **Toolchain**: GNU Arm Embedded Toolchain (`arm-none-eabi-gcc`).
-*   **Debugger**: Any SWD-compatible probe (e.g., J-Link, ST-Link).
-
-### Pinout
-
-*   `PA4`: TMR14_CH1 - PWM Output.
-*   `PA9`: USART1_TX.
-*   `PA10`: USART1_RX.
-*   `PA13`/`PA14`: SWDIO/SWCLK for debugging.
-
 ## How to Build and Run
 
 ### 1. Dependencies
@@ -65,8 +65,8 @@ sh setup_project.sh
 ```
 
 This script will:
-*   Create `inc/` directory.
-*   Download the necessary CMSIS core files, Artery device headers, and driver files.
+*   Create the `inc/` directory.
+*   Download the necessary CMSIS core files, Artery device headers, and driver files into it.
 *   Create a project-specific `at32f421_conf.h` from a template, enabling only the modules used (`CRM`, `TMR`, `USART`, `GPIO`, `FLASH`).
 *   Patch the `startup_at32f421.s` file to comment out the `__libc_init_array` call, as we are not using the standard C library.
 
