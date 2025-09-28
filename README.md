@@ -7,22 +7,22 @@ The core of the application is an event-driven main loop that uses the ARM core'
 ## Key Features
 
 *   **Event-Driven, Low-Power Core**: The main loop is driven by timer events and sleeps using `WFE`, consuming minimal power while waiting.
-*   **Interrupt-less Wake-up**: Utilizes the `SEVONPEND` feature to wake the core from sleep via timer events without executing a full Interrupt Service Routine (ISR) [5].
-*   **Centralized Clock Management**: A robust `crm` module configures the system clock (up to 120MHz/125MHz) from either the internal HICK or an external crystal (HEXT). All peripheral clock calculations are derived automatically [6].
-*   **Direct Register Access**: All peripherals (GPIO, Timers, USART) are configured via direct register writes for maximum performance and code transparency [1][10][8][9].
-*   **Zero Standard Library Dependencies**: Includes a lightweight, custom `usart_putuint` and `usart_puts` for serial output, removing the need for `stdio.h` [7].
-*   **Automated Toolchain Setup**: A shell script (`setup_project.sh`) downloads the necessary CMSIS and Artery library files and patches them for the project [2].
-*   **Configurable Peripherals via Macros**: Easily configure PWM frequency, duty cycle, and USART baud rate by defining macros in the respective header files (`timer.h`, `usart.h`) [3][7].
+*   **Interrupt-less Wake-up**: Utilizes the `SEVONPEND` feature to wake the core from sleep via timer events without executing a full Interrupt Service Routine (ISR).
+*   **Centralized Clock Management**: A robust `crm` module configures the system clock (up to 120MHz/125MHz) from either the internal HICK or an external crystal (HEXT). All peripheral clock calculations are derived automatically.
+*   **Direct Register Access**: All peripherals (GPIO, Timers, USART) are configured via direct register writes for maximum performance and code transparency.
+*   **Zero Standard Library Dependencies**: Includes a lightweight, custom `usart_putuint` and `usart_puts` for serial output, removing the need for `stdio.h`.
+*   **Automated Toolchain Setup**: A shell script (`setup_project.sh`) downloads the necessary CMSIS and Artery library files and patches them for the project.
+*   **Configurable Peripherals via Macros**: Easily configure PWM frequency, duty cycle, and USART baud rate by defining macros in the respective header files (`timer.h`, `usart.h`).
 
 ## Architecture
 
-The software architecture is designed around a single, event-driven `while(1)` loop in `main.c` [5].
+The software architecture is designed around a single, event-driven `while(1)` loop in `main.c`.
 
 1.  **System Initialization**: `system_init()` orchestrates the configuration of all hardware:
-    *   `crm_config()`: Sets up the system clock (e.g., 120MHz PLL) and enables peripheral clocks [4][6].
-    *   `gpio_config()`: Configures GPIO pins for PWM output (PA4) and USART (PA9/PA10) [1][10].
-    *   `timer_config()`: Configures TMR14 to generate a PWM signal and periodic update events [3][8].
-    *   `usart_config()`: Initializes USART1 for debug message output [7][9].
+    *   `crm_config()`: Sets up the system clock (e.g., 120MHz PLL) and enables peripheral clocks.
+    *   `gpio_config()`: Configures GPIO pins for PWM output (PA4) and USART (PA9/PA10).
+    *   `timer_config()`: Configures TMR14 to generate a PWM signal and periodic update events.
+    *   `usart_config()`: Initializes USART1 for debug message output.
 2.  **Event-Driven Main Loop**:
     *   The core enters a low-power sleep state by executing the `WFE` instruction.
     *   TMR14 is configured to generate an update event at a fixed frequency.
@@ -33,16 +33,22 @@ This model avoids the overhead of ISRs for simple periodic tasks, providing a hi
 
 ## Hardware and Toolchain
 
-*   **Microcontroller**: Artery AT32F421 (ARM Cortex-M4).
+The hardware for this project is a generic STM32F030F4P6 "blue pill" style development board, commonly found on AliExpress. The original STM32 microcontroller was desoldered and replaced with a pin-compatible **Artery AT32F421F8P7** (TSSOP-20 package).
+
+This modification allows for leveraging the higher performance of the Artery MCU on a cheap and widely available development board.
+
+![Modified AT32F421 Development Board](devboard.jpg)
+
+*   **Microcontroller**: Artery AT32F421F8P7 (ARM Cortex-M4).
 *   **Toolchain**: GNU Arm Embedded Toolchain (`arm-none-eabi-gcc`).
 *   **Debugger**: Any SWD-compatible probe (e.g., J-Link, ST-Link).
 
 ### Pinout
 
-*   `PA4`: TMR14_CH1 - PWM Output [1].
-*   `PA9`: USART1_TX [1].
-*   `PA10`: USART1_RX [1].
-*   `PA13`/`PA14`: SWDIO/SWCLK for debugging [1].
+*   `PA4`: TMR14_CH1 - PWM Output.
+*   `PA9`: USART1_TX.
+*   `PA10`: USART1_RX.
+*   `PA13`/`PA14`: SWDIO/SWCLK for debugging.
 
 ## How to Build and Run
 
@@ -58,8 +64,8 @@ Run the provided shell script to download the required library files:
 sh setup_project.sh
 ```
 
-This script will [2]:
-*   Create `inc/` and `src/` directories.
+This script will:
+*   Create `inc/` directory.
 *   Download the necessary CMSIS core files, Artery device headers, and driver files.
 *   Create a project-specific `at32f421_conf.h` from a template, enabling only the modules used (`CRM`, `TMR`, `USART`, `GPIO`, `FLASH`).
 *   Patch the `startup_at32f421.s` file to comment out the `__libc_init_array` call, as we are not using the standard C library.
@@ -68,18 +74,18 @@ This script will [2]:
 
 You can customize the application's behavior by editing the header files before compiling:
 
-*   **System Clock**: To use an external crystal, define `HEXT_FREQUENCY` in `crm.h`. If left undefined, it defaults to the internal HICK clock [6].
+*   **System Clock**: To use an external crystal, define `HEXT_FREQUENCY` in `crm.h`. If left undefined, it defaults to the internal HICK clock.
     ```
     // file: crm.h
     #define HEXT_FREQUENCY 8 // Use an 8MHz external crystal
     ```
-*   **PWM Signal**: Set the PWM frequency and duty cycle in `timer.h` [3].
+*   **PWM Signal**: Set the PWM frequency and duty cycle in `timer.h`.
     ```
     // file: timer.h
     #define PWM_FREQUENCY_HZ 1 // 1 Hz
     #define PWM_DUTY_RATIO   50 // 50% duty cycle
     ```
-*   **Baud Rate**: Change the USART baud rate in `usart.h` [7].
+*   **Baud Rate**: Change the USART baud rate in `usart.h`.
     ```
     // file: usart.h
     #define USART_BAUDRATE 115200
@@ -89,19 +95,19 @@ You can customize the application's behavior by editing the header files before 
 
 Compile the source files using your project's Makefile or build system, linking against the downloaded startup files and linker script. Flash the resulting `.elf` or `.bin` file to your AT32F421 board.
 
-Connect a serial-to-USB adapter to PA9/PA10 to view the output. The application will print system info on startup and then periodic runtime statistics [5].
+Connect a serial-to-USB adapter to PA9/PA10 to view the output. The application will print system info on startup and then periodic runtime statistics.
 
 ## File Structure
 
-*   `main.c`: Contains the main application logic, initialization sequence, and the event-driven loop [5].
-*   `setup_project.sh`: Script to automate the download and configuration of library files [2].
+*   `main.c`: Contains the main application logic, initialization sequence, and the event-driven loop.
+*   `setup_project.sh`: Script to automate the download and configuration of library files.
 *   **Configuration Headers**:
-    *   `crm.h`: Clock configuration, PLL settings, and peripheral clock enabling [6].
-    *   `gpio.h`: GPIO pin alternate function and mode definitions [1].
-    *   `timer.h`: TMR14 configuration for PWM and event generation [3].
-    *   `usart.h`: USART configuration and baud rate calculation [7].
+    *   `crm.h`: Clock configuration, PLL settings, and peripheral clock enabling.
+    *   `gpio.h`: GPIO pin alternate function and mode definitions.
+    *   `timer.h`: TMR14 configuration for PWM and event generation.
+    *   `usart.h`: USART configuration and baud rate calculation.
 *   **Implementation Files**:
-    *   `crm.c`: Logic for initializing the system clock [4].
-    *   `gpio.c`: Single function to configure all GPIO pins [10].
-    *   `timer.c`: Logic for configuring TMR14 registers [8].
-    *   `usart.c`: USART initialization and lightweight character/string/integer printing functions [9].
+    *   `crm.c`: Logic for initializing the system clock.
+    *   `gpio.c`: Single function to configure all GPIO pins.
+    *   `timer.c`: Logic for configuring TMR14 registers.
+    *   `usart.c`: USART initialization and lightweight character/string/integer printing functions.
