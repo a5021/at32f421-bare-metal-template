@@ -50,8 +50,8 @@ crm_status_t crm_config(void) {
                  FLASH_PSR_PFT_EN |         /* Enable main prefetch buffer */
                  FLASH_PSR_PFT_EN2;         /* Enable prefetch buffer block 2 */
 
-    /* Step 6: Switch system clock to PLL */
-    CRM->cfg |= CRM_CFG_SCLKSEL_PLL;
+    /* Step 6: Switch system clock to PLL (PLL config locked, dividers at defaults) */
+    CRM->cfg = CRM_CFG_SCLKSEL_PLL;
 
     /* Step 7: Wait for system clock switch to complete */
     timeout = CRM_SWITCH_TIMEOUT;
