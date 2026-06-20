@@ -1,4 +1,6 @@
 # AT32F421 Bare-Metal PWM Demo with Event-Driven Low-Power Loop
+[![Build](https://github.com/a5021/at32f421-bare-metal-template/actions/workflows/build.yml/badge.svg)](https://github.com/a5021/at32f421-bare-metal-template/actions/workflows/build.yml) [![MCU](https://img.shields.io/badge/MCU-AT32F421F8P7-00A9E0)]() [![Core](https://img.shields.io/badge/Core-Cortex--M4-00A9E0)]() [![License](https://img.shields.io/badge/License-MIT-yellow)]()
+
 
 This project demonstrates a minimal, high-performance, and low-power application for the Artery AT32F421 microcontroller. It is written in pure C with direct register access, avoiding vendor HAL libraries to achieve maximum efficiency and a small footprint.
 
